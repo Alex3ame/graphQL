@@ -1,5 +1,5 @@
 
-
+let userId = "";
 let LS = localStorage
 
 function clearLS(){
@@ -25,7 +25,8 @@ checkLS();
 function decodeToken(){
   const [, payload] = LS.getItem("token").split('.');
   let decodeLS = JSON.parse(atob(payload));
-  console.log("UserId =", decodeLS['sub']);
+  userId = decodeLS['sub'];
+  console.log("UserId =", userId);
 }
 
 
