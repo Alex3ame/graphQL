@@ -1,15 +1,17 @@
 
 let userId = "";
-let LS = localStorage
+let LS = localStorage;
+let JWTSplit
+let JWT 
 
 function clearLS(){
   LS.clear();
   checkLS();
+  location.reload();
 }
 
 //create login form
 function checkLS(){
-  //console.log(localStorage.length)
   if (localStorage.length == 0){
     document.getElementById('myForm').innerHTML= 
     '<h1>Enter your email and password</h1> <input type="text" name="login" id="login" placeholder="Login"></input> <input type="text" name="pass" id="pass" placeholder="Password"> <span onclick="signRequest()">Send</span>';
@@ -19,17 +21,36 @@ function checkLS(){
   }
 }
 checkLS();
-
+//console.log(JWT,JWTSplit)
 
 //decode token and get id
 function decodeToken(){
-  const [, payload] = LS.getItem("token").split('.');
+  JWTSplit = [, payload] = LS.getItem("token").split('.');
   let decodeLS = JSON.parse(atob(payload));
   userId = decodeLS['sub'];
-  console.log("UserId =", userId);
+  document.getElementById("userID").innerText = userId
+
 }
-
-
+//console.log(JWT)
+async function bearerRequest (){
+  let response = await fetch('https://01.kood.tech/api/graphql-engine/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + `${JWT}`,
+      },
+      body: JSON.stringify({
+        query: `
+        {
+          user{
+            login
+          }
+        }
+        `,
+          }),
+    })
+    let result = await response.json();
+    console.log(result)
+};
 
 async function signRequest (){
 
@@ -38,16 +59,12 @@ let user = {
     password: document.getElementById('pass').value
   };
 
-  
-  
-  //console.log(user);
   let response = await fetch('https://01.kood.tech/api/auth/signin', {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {
       "Authorization": 'Basic ' + btoa(`${user.email}:${user.password}`)
     },
-    
   });
 
   //clear form
@@ -61,12 +78,11 @@ let user = {
   }else{
     let result = await response.json();
     LS == localStorage.setItem('token',result); 
+    JWT = LS.getItem("token");
+    bearerRequest();
+   //location.reload();
     checkLS();
-    
-    //console.log(response.status);
-    //alert(result.message);
-  }
-      
+  }     
 }
 
 
