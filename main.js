@@ -89,7 +89,7 @@ function userLevel() {
               level = result.data.transaction[i].amount
               levelPoints.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-05-28T10:20:30.184449+00:00")) / (1000 * 60 * 60 * 24)), 60 - level])
           }
-          document.getElementById("level").innerText = level
+          document.getElementById("level").innerText = result.data.transaction.length
           drawLevelGraph()
       })
 }
