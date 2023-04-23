@@ -87,7 +87,7 @@ function userLevel() {
       .then(function(result) {
           for (i = 0; i < result.data.transaction.length; i++) {
               level = result.data.transaction[i].amount
-              levelPoints.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-09-17T15:13:44.184449+00:00")) / (1000 * 60 * 60 * 24)), 60 - level])
+              levelPoints.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-05-28T10:20:30.184449+00:00")) / (1000 * 60 * 60 * 24)), 60 - level])
           }
           document.getElementById("level").innerText = level
           drawLevelGraph()
