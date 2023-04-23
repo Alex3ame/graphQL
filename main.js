@@ -1,4 +1,3 @@
-
 let userId = "";
 let LS = localStorage;
 let JWTSplit
@@ -7,9 +6,12 @@ let username
 let levelOffset = 0
 let levelPoints = [[0, 60]]
 let level = 0
-let totalXP = 0
+let auditUp = 0
+let auditDown = 0
+let auditUpOffset = 0
+let auditDownOffset = 0
 let xpOffset = 0
-let points = []
+
 
 function clearLS(){
   LS.clear();
@@ -28,7 +30,8 @@ function checkLS(){
     JWT = LS.getItem("token");
     usersName();
     userLevel();
-    userXP();
+    AuditUp();
+    AuditDown();
   }
 }
 checkLS();
@@ -87,15 +90,15 @@ function userLevel() {
       .then(function(result) {
           for (i = 0; i < result.data.transaction.length; i++) {
               level = result.data.transaction[i].amount
-              levelPoints.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-05-28T10:20:30.184449+00:00")) / (1000 * 60 * 60 * 24)), 60 - level])
+              levelPoints.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-08-28T10:20:30.184449+00:00")) / (1000 * 60 * 60 * 24)), 60 - level])
           }
           document.getElementById("level").innerText = result.data.transaction.length
           drawLevelGraph()
       })
 }
 
-//get total XP
-function userXP() {
+
+function AuditUp() {
   fetch('https://01.kood.tech/api/graphql-engine/v1/graphql', {
           method: 'POST',
           headers: {
@@ -104,9 +107,8 @@ function userXP() {
           body: JSON.stringify({
               query: `
     {
-      transaction(offset:${xpOffset}, where: { userId: { _eq: ${userId} } type: { _eq: "xp"}} order_by: {createdAt: asc}) {
+      transaction(offset:${xpOffset}, where: { userId: { _eq: ${userId} } type: { _eq: "up"}} ) {
             amount
-            createdAt
       }
   }
       `,
@@ -115,14 +117,54 @@ function userXP() {
       .then((res) => res.json())
       .then(function(result) {
           for (i = 0; i < result.data.transaction.length; i++) {
-              totalXP += result.data.transaction[i].amount
-              points.push([Math.round((Date.parse(result.data.transaction[i].createdAt) - Date.parse("2021-05-28T10:20:30.24974+00:00")) / (1000 * 60 * 60 * 24)) * 10, totalXP / 1000])
+              auditUp += result.data.transaction[i].amount
           }
-          document.getElementById("xp").innerText = totalXP
-              drawXPGraph()
+          auditUpOffset += 50
+          if (result.data.transaction.length > 49) {
+              setTimeout(() => {
+                  AuditUp()
+              }, "200")
+          } else {
+              drawAuditRatioGraph()
+              document.getElementById("auditUp").innerText =  Math.round(auditUp)
+          }
       })
 }
 
+
+
+function AuditDown() {
+  fetch('https://01.kood.tech/api/graphql-engine/v1/graphql', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + `${JWT}`,
+          },
+          body: JSON.stringify({
+              query: `
+    {
+      transaction(offset:${auditDownOffset}, where: { userId: { _eq: ${userId} } type: { _eq: "down"}}) {
+            amount
+      }
+  }
+      `,
+          }),
+      })
+      .then((res) => res.json())
+      .then(function(result) {
+          for (i = 0; i < result.data.transaction.length; i++) {
+              auditDown += result.data.transaction[i].amount
+          }
+          auditDownOffset += 50
+          if (result.data.transaction.length > 49) {
+              setTimeout(() => {
+                  AuditDown()
+              }, "200")
+          } else {
+              drawAuditRatioGraph()
+              document.getElementById("auditDown").innerText = Math.round(auditDown)
+          }
+      })
+}
 
 
 
@@ -156,17 +198,18 @@ let user = {
   }     
 }
 
-function drawXPGraph() {
-  for (i = 0; i < points.length; i++) {
-      points[i][1] = (totalXP / 1000) - points[i][1]
-  }
-  points.push([points[points.length - 1][0], totalXP / 1000])
-  document.getElementById("xpOverTime").innerHTML = ` 
-<svg id="xpGraph" width="100%" height="100%" viewBox="0 0 ${points[points.length-1][0]} ${points[points.length-1][1]} ">
-<polyline fill="#008080" stroke="#000000" stroke-width="20" points=" ${points.join(" ")} "/>
+function drawAuditRatioGraph() {
+  document.getElementById("auditRatio").innerHTML = `
+<h1 style="border-width: 0px; position: absolute; margin-right: 230px">${Math.round(100*auditUp/(auditDown+auditUp))}%</h1>
+<svg width="100%" height="100%" viewBox="0 0 42 42" class="donut">
+<circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="transparent"></circle>
+<circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#00AA00" stroke-width="3"></circle>
+<circle class="donut-segment" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#AA0000" stroke-width="3" stroke-dasharray="${Math.round(100*auditDown/(auditDown+auditUp))} ${Math.round(100*auditUp/(auditDown+auditUp))}" stroke-dashoffset="25"></circle>
 </svg>
+<h1 style="border-width: 0px; position: absolute; color: #FFFFFF; margin-left: 230px">${Math.round(100*auditDown/(auditDown+auditUp))}%</h1>
 `
 }
+
 
 function drawLevelGraph() {
     levelPoints.push([Math.round(Date.now() - Date.parse("2021-09-17T15:13:44.184449+00:00")) / (1000 * 60 * 60 * 24), levelPoints[levelPoints.length - 1][1]])
