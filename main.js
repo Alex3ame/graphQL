@@ -3,6 +3,7 @@ let userId = "";
 let LS = localStorage;
 let JWTSplit
 let JWT 
+let username
 
 function clearLS(){
   LS.clear();
@@ -18,6 +19,8 @@ function checkLS(){
   }else{
     document.getElementById('myForm').innerHTML='<span onclick="clearLS()">Logout</span>';
     decodeToken();
+    JWT = LS.getItem("token");
+    usersName();
   }
 }
 checkLS();
@@ -32,7 +35,7 @@ function decodeToken(){
 
 }
 //console.log(JWT)
-async function bearerRequest (){
+async function usersName (){
   let response = await fetch('https://01.kood.tech/api/graphql-engine/v1/graphql', {
       method: 'POST',
       headers: {
@@ -41,15 +44,19 @@ async function bearerRequest (){
       body: JSON.stringify({
         query: `
         {
-          user{
-            login
-          }
+         
+            user{
+              login
+            }
+          
         }
         `,
           }),
     })
     let result = await response.json();
-    console.log(result)
+    //console.log(result.data.user[0].login)
+    username = result.data.user[0].login
+    document.getElementById("userName").innerText = username
 };
 
 async function signRequest (){
@@ -78,8 +85,7 @@ let user = {
   }else{
     let result = await response.json();
     LS == localStorage.setItem('token',result); 
-    JWT = LS.getItem("token");
-    bearerRequest();
+    
    //location.reload();
     checkLS();
   }     
