@@ -203,8 +203,8 @@ function drawAuditRatioGraph() {
 <h1 style="border-width: 0px; position: absolute; margin-right: 230px">${Math.round(100*auditUp/(auditDown+auditUp))}%</h1>
 <svg width="100%" height="100%" viewBox="0 0 42 42" class="donut">
 <circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="transparent"></circle>
-<circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#00AA00" stroke-width="3"></circle>
-<circle class="donut-segment" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#AA0000" stroke-width="3" stroke-dasharray="${Math.round(100*auditDown/(auditDown+auditUp))} ${Math.round(100*auditUp/(auditDown+auditUp))}" stroke-dashoffset="25"></circle>
+<circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#AA0000" stroke-width="3"></circle>
+<circle class="donut-segment" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#00AA00" stroke-width="3" stroke-dasharray="${Math.round(100*auditDown/(auditDown+auditUp))} ${Math.round(100*auditUp/(auditDown+auditUp))}" stroke-dashoffset="25"></circle>
 </svg>
 <h1 style="border-width: 0px; position: absolute; color: #FFFFFF; margin-left: 230px">${Math.round(100*auditDown/(auditDown+auditUp))}%</h1>
 `
