@@ -120,10 +120,14 @@ function AuditUp() {
               auditUp += result.data.transaction[i].amount
           }
           auditUpOffset += 50
-
+          if (result.data.transaction.length > 49) {
+              setTimeout(() => {
+                  AuditUp()
+              }, "200")
+          } else {
               drawAuditRatioGraph()
               document.getElementById("auditUp").innerText =  Math.round(auditUp/1000) + " kB"
-          
+          }
       })
 }
 
@@ -151,14 +155,10 @@ function AuditDown() {
               auditDown += result.data.transaction[i].amount
           }
           auditDownOffset += 50
-          if (result.data.transaction.length > 49) {
-              setTimeout(() => {
-                  AuditDown()
-              }, "200")
-          } else {
+ 
               drawAuditRatioGraph()
               document.getElementById("auditDown").innerText = Math.round(auditDown/1000) + " kB"
-          }
+          
       })
 }
 
